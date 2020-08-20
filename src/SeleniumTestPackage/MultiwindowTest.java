@@ -16,6 +16,7 @@ public class MultiwindowTest {
 	public static ArrayList<WebDriver> driverList = new ArrayList<WebDriver>();
 	
 	public static void main(String[] args) {
+		/*
 		String[] URLList = new String[] { // Needs to change
 				"https://www.roblox.com/library/29126833",
 				"https://www.roblox.com/library/398833052",
@@ -90,6 +91,7 @@ public class MultiwindowTest {
         for (int i=0; i<driverList.size(); i++) {
         	CloseDriver(i, driverList.get(i));
         }
+        */
 	}
 	
 	public static void CloseDriver(int index, WebDriver driver) {

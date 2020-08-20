@@ -18,7 +18,8 @@ public class Test {
 		};
 		
 		// Collector.collectItems(URLList);
-		
+		Collector.InitializeCollector();
 		GUI mainFrame = new GUI();
+		mainFrame.LoadConfigurations();
 	}
 }

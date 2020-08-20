@@ -55,6 +55,6 @@ public class AssetIDParser {
 	
 	public static void main(String[] args) {
 		// Parse();
-		Parse(""); // Insert row here
+		// Parse(""); // Insert row here
 	}
 }

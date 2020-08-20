@@ -15,6 +15,14 @@ public class GUI {
 	public JPanel mainPanel;
 	
 	public JPanel rowPanel;
+	
+	public JLabel profileLabel;
+	public JTextField profileEntry;
+	public JLabel driverLabel;
+	public JTextField driverEntry;
+	public JLabel userdataLabel;
+	public JTextField userdataEntry;
+	
 	public JLabel rowLabel;
 	public JTextField rowEntry;
 	public JButton rowEntryEnter;
@@ -23,14 +31,17 @@ public class GUI {
 	public JPanel parsedIDPanel;
 	public JLabel parsedIDLabel;
 	public JTextArea parsedIDEntry;
+	public JScrollPane parsedIDEntryScroll;
 	
 	public JPanel collectorPanel;
 	public JLabel collectorLabel;
 	public JTextArea collectorOutput;
+	public JScrollPane collectorOutputScroll;
 	
 	public JPanel scriptPanel;
 	public JLabel scriptLabel;
 	public JTextArea scriptOutput;
+	public JScrollPane scriptOutputScroll;
 	
 	
 	public GUI() {
@@ -49,12 +60,33 @@ public class GUI {
 		scriptPanel = new JPanel(new FlowLayout(3));
 		mainPanel.add(scriptPanel);
 		
+		userdataLabel = new JLabel("Chrome 'User Data' Folder Location");
+		userdataLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		rowPanel.add(userdataLabel);
+		userdataEntry = new JTextField(15);
+		userdataEntry.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		rowPanel.add(userdataEntry);
+		
+		profileLabel = new JLabel("Chrome Profile Name: ");
+		profileLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		rowPanel.add(profileLabel);
+		profileEntry = new JTextField(12);
+		profileEntry.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		rowPanel.add(profileEntry);
+		
+		driverLabel = new JLabel("'chromedriver.exe' Location: ");
+		driverLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		rowPanel.add(driverLabel);
+		driverEntry = new JTextField(42);
+		driverEntry.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		rowPanel.add(driverEntry);
+		
 		rowLabel = new JLabel("Row Data: ");
 		rowLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
 		rowPanel.add(rowLabel);
 		
-		rowEntry = new JTextField(55);
-		rowEntry.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		rowEntry = new JTextField(45);
+		rowEntry.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		rowEntry.addActionListener(action -> {
 			ParseEnter();
 		});
@@ -78,30 +110,33 @@ public class GUI {
 		parsedIDLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
 		parsedIDPanel.add(parsedIDLabel);
 		
-		parsedIDEntry = new JTextArea(10, 55);
+		parsedIDEntry = new JTextArea(8, 55);
 		parsedIDEntry.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		parsedIDPanel.add(parsedIDEntry);
+		parsedIDEntryScroll = new JScrollPane(parsedIDEntry);
+		parsedIDPanel.add(parsedIDEntryScroll);
 		
 		collectorLabel = new JLabel("Status: ");
 		collectorLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
 		collectorPanel.add(collectorLabel);
 		
-		collectorOutput = new JTextArea(10, 55);
+		collectorOutput = new JTextArea(8, 55);
 		collectorOutput.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		collectorPanel.add(collectorOutput);
+		collectorOutputScroll = new JScrollPane(collectorOutput);
+		collectorPanel.add(collectorOutputScroll);
 		
 		scriptLabel = new JLabel(
-			"Script (Run this in Studio Command Line): ");
+			"Script (CTRL+A, Copy, & Paste into Studio Command Line): ");
 		scriptLabel.setFont(new Font("Tahoma", Font.BOLD, 16));
 		scriptPanel.add(scriptLabel);
 		
-		scriptOutput = new JTextArea(20, 55);
+		scriptOutput = new JTextArea(8, 55);
 		scriptOutput.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		scriptPanel.add(scriptOutput);
+		scriptOutputScroll = new JScrollPane(scriptOutput);
+		scriptPanel.add(scriptOutputScroll);
 		
 		mainFrame = new JFrame("Collector");
 		mainFrame.setBounds(50, 50, 100, 100);
-		mainFrame.setSize(800, 800);
+		mainFrame.setSize(800, 850);
 		mainFrame.setResizable(false);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.getContentPane().add(mainPanel);
@@ -109,8 +144,33 @@ public class GUI {
 		mainFrame.setVisible(true);
 	}
 	
+	public void LoadConfigurations() {
+		File config = new File(
+			"config.txt" // src/SeleniumTestPackage/
+		);
+		Scanner scan = null;
+		try {
+			scan = new Scanner(config);
+		} catch (FileNotFoundException e) {
+			collectorOutput.setText("config.txt not found");
+		}
+		while (scan.hasNextLine()) {
+			String line = scan.nextLine();
+			
+			if (line.contains("userdataPath") && userdataEntry != null)
+				userdataEntry.setText(scan.nextLine());
+			else if (line.contains("profileName") && profileEntry != null)
+				profileEntry.setText(scan.nextLine());
+			else if (line.contains("driverPath") && driverEntry != null)
+				driverEntry.setText(scan.nextLine());
+		}
+	}
+	
 	public void ParseEnter() {
-		if (parsedIDEntry != null) {
+		if (userdataEntry != null && userdataEntry.getText() != ""
+		&& driverEntry != null && driverEntry.getText() != ""
+		&& profileEntry != null && profileEntry.getText() != ""
+		&& parsedIDEntry != null) {
 			String[] URLList = AssetIDParser.Parse(rowEntry.getText());
 			String URLListDisplay = "";
 			String outputListDisplay = "";
@@ -123,12 +183,18 @@ public class GUI {
 				}
 				parsedIDEntry.setText(URLListDisplay);
 				
-				String[] outputList = Collector.collectItems(URLList);
+				String[] outputList = Collector.collectItems(
+					profileEntry.getText(), 
+					userdataEntry.getText(),
+					driverEntry.getText(),
+					URLList);
 				
 				for (int i=0; i<outputList.length; i++) {
 					outputListDisplay += outputList[i] + "\n";
 				}
 				collectorOutput.setText(outputListDisplay);
+				
+				scriptOutput.setText(generateScript(URLList));
 			}
 			
 			mainFrame.setTitle("Collector");
@@ -136,24 +202,31 @@ public class GUI {
 	}
 	
 	public String generateScript(String[] URLList) {
-		File luaScript = new File("FreeModelScanner.lua");
-		Scanner scan = new Scanner(luaScript);
+		File luaScript = new File(
+			"FreeModelScanner.lua" // src/SeleniumTestPackage/
+		);
+		Scanner scan = null;
+		try {
+			scan = new Scanner(luaScript);
+		} catch (FileNotFoundException e) {
+			System.out.println("no file found");
+		}
 		String newScript = "";
 		String listToInsert = "";
 		
 		if (URLList.length > 0) {
 			for (int i=0; i<URLList.length; i++) {
-				listToInsert += "\"" + URLList[i] + "\",";
+				listToInsert += "\"" + URLList[i] + "\",\n";
 			}
 			while (scan.hasNextLine()) {
 				String line = scan.nextLine();
 				String newLine = line;
 				
-				if (line.matches("*0!replace!0*")) {
+				if (line.contains("--0!replace")) {
 					newLine = line.replace(line, listToInsert);
 				}
 				
-				newScript += newLine;
+				newScript += newLine + "\n";
 			}
 		}
 		return newScript;
