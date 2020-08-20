@@ -26,6 +26,7 @@ public class GUI {
 	public JLabel rowLabel;
 	public JTextField rowEntry;
 	public JButton rowEntryEnter;
+	public JButton rowEntryEnterNoGet;
 	public JButton rowEntryClear;
 	
 	public JPanel parsedIDPanel;
@@ -88,16 +89,23 @@ public class GUI {
 		rowEntry = new JTextField(45);
 		rowEntry.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		rowEntry.addActionListener(action -> {
-			ParseEnter();
+			ParseEnter(false);
 		});
 		rowPanel.add(rowEntry);
 		
 		rowEntryEnter = new JButton("Enter");
 		rowEntryEnter.setFont(new Font("Tahoma", Font.BOLD, 16));
 		rowEntryEnter.addActionListener(action -> {
-			ParseEnter();
+			ParseEnter(false);
 		});
 		rowPanel.add(rowEntryEnter);
+		
+		rowEntryEnterNoGet = new JButton("Enter w/o Get");
+		rowEntryEnterNoGet.setFont(new Font("Tahoma", Font.BOLD, 16));
+		rowEntryEnterNoGet.addActionListener(action -> {
+			ParseEnter(true);
+		});
+		rowPanel.add(rowEntryEnterNoGet);
 		
 		rowEntryClear = new JButton("Clear");
 		rowEntryClear.setFont(new Font("Tahoma", Font.BOLD, 16));
@@ -166,7 +174,7 @@ public class GUI {
 		}
 	}
 	
-	public void ParseEnter() {
+	public void ParseEnter(boolean skipGet) {
 		if (userdataEntry != null && userdataEntry.getText() != ""
 		&& driverEntry != null && driverEntry.getText() != ""
 		&& profileEntry != null && profileEntry.getText() != ""
@@ -183,16 +191,18 @@ public class GUI {
 				}
 				parsedIDEntry.setText(URLListDisplay);
 				
-				String[] outputList = Collector.collectItems(
-					profileEntry.getText(), 
-					userdataEntry.getText(),
-					driverEntry.getText(),
-					URLList);
-				
-				for (int i=0; i<outputList.length; i++) {
-					outputListDisplay += outputList[i] + "\n";
+				if (!skipGet) {
+					String[] outputList = Collector.collectItems(
+						profileEntry.getText(), 
+						userdataEntry.getText(),
+						driverEntry.getText(),
+						URLList);
+					
+					for (int i=0; i<outputList.length; i++) {
+						outputListDisplay += outputList[i] + "\n";
+					}
+					collectorOutput.setText(outputListDisplay);
 				}
-				collectorOutput.setText(outputListDisplay);
 				
 				scriptOutput.setText(generateScript(URLList));
 			}

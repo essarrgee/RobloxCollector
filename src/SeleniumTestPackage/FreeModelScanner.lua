@@ -35,6 +35,10 @@ local badScriptLineList = {
 	"kick", "ban", "crash", "shutdown",
 	"do not",
 	"IsStudio",
+	--Bad Module IDs
+	"1398224164", 
+	"1303852485", --Not too sure
+	"2342106098",
 }
 
 function SpawnModels(assetList, timer)
