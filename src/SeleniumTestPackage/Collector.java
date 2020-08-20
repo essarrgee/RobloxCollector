@@ -10,47 +10,51 @@ import org.openqa.selenium.support.ui.*;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import java.util.*;
 
-public class TestClass {
-	public static void main(String[] args) {
-		String[] URLList = new String[] { // Needs to change
-			"https://www.roblox.com/library/5556175315/Sign",
-			"https://www.roblox.com/library/543535520/HD-SkyBox-HiRes-by-Stormchaserlukas1090", 
-			"https://www.roblox.com/library/5408841490/BoomBox",
-		};
-		
+public class Collector {
+	
+	public static String[] collectItems(String[] URLList) {
 		String currentProfile = "Profile 2"; // Needs to change
-		String chromeDriver = "C:/Users/19258/Programs/chromedriver.exe"; // Needs to change
+		String driverPath = "C:/Users/19258/Programs/chromedriver.exe"; // Needs to change
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--user-data-dir=C:/Users/19258/AppData/Local/Google/Chrome/User Data"); // Needs to change
 		options.addArguments("profile-directory=" + currentProfile);
-		System.setProperty("webdriver.chrome.driver", chromeDriver);
+		System.setProperty("webdriver.chrome.driver", driverPath);
+		
+		String[] outputList = new String[URLList.length];
 		
 		WebDriver driver = new ChromeDriver(options);
+		
         for (int i=0; i<URLList.length; i++) {
 			String currentURL = URLList[i];
 			boolean taken = CheckPage(driver, currentURL);
-			if (taken) {
-				System.out.println("Successfully taken Model: (" + currentURL + ")");
-			}
-			else {
-				System.out.println("Cannot/Already took Model: (" + currentURL + ")");
-			}
+			String output = "Cannot/Already took Model: (" + (i+1) + ": " + currentURL + ")";
+			if (taken)
+				output = "Successfully taken Model: (" + (i+1) + ": " + currentURL + ")";
+			System.out.println(output);
+			outputList[i] = output;
         }
         
+        System.out.println("done.");
         driver.quit();
+        
+        return outputList;
 	}
 	
 	public static boolean CheckPage(WebDriver driver, String currentURL) {
 		try {
-			WebDriverWait wait = new WebDriverWait(driver, 8);
+			WebDriverWait wait = new WebDriverWait(driver, 10);
             driver.get(currentURL);
+            
+            wait = new WebDriverWait(driver, 2); // Stall Selenium for X seconds for new page to fully load
+			try { wait.until(presenceOfElementLocated(By.className("does-not-exist.stalling"))); }
+            catch(TimeoutException error) {}
             
             try { wait.until(presenceOfElementLocated(By.className("btn-fixed-width-lg"))); }
             catch(TimeoutException error) { return false; }
             WebElement buyButton = wait.until(presenceOfElementLocated(By.className("btn-fixed-width-lg")));
             
             try { buyButton.click(); }
-            catch(Exception error) { return false; }
+            catch(Exception error) { System.out.println(error); return false; }
             
             try { wait.until(presenceOfElementLocated(By.id("confirm-btn"))); }
             catch(TimeoutException error) { return false; }
@@ -62,6 +66,10 @@ public class TestClass {
 			try { wait.until(presenceOfElementLocated(By.className("on"))); }
             catch(TimeoutException error) { return false; }
 			WebElement confirmation = wait.until(presenceOfElementLocated(By.className("on")));
+			
+			wait = new WebDriverWait(driver, 2); // Stall Selenium for X seconds
+			try { wait.until(presenceOfElementLocated(By.className("does-not-exist.stalling"))); }
+            catch(TimeoutException error) { return true; }
 	    }
         finally {};
         return true;
