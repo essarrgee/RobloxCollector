@@ -34,6 +34,7 @@ local badScriptLineList = {
 	"CXdrU>SGS?OBQOS", --"Crash" script
 	"kick", "crash", "shutdown",
 	"do not",
+	"IsStudio",
 }
 
 function SpawnModels(assetList, timer)

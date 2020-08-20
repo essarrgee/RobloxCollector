@@ -66,12 +66,14 @@ public class Collector {
             */
 			
 			wait = new WebDriverWait(driver, 2);
-            try { wait.until(presenceOfElementLocated(By.className("item-first-line"))); }
-            catch(TimeoutException error) {}
-            WebElement priceContainer = wait.until(presenceOfElementLocated(By.className("item-first-line")));
-            if (priceContainerCode.get(priceContainer.getText()) != null) {
-            	return priceContainerCode.get(priceContainer.getText()).intValue();
+            try { 
+            	WebElement priceContainer = wait.until(presenceOfElementLocated(By.className("item-first-line")));
+	            if (priceContainer != null && priceContainerCode.get(priceContainer.getText()) != null) {
+	            	return priceContainerCode.get(priceContainer.getText()).intValue();
+	            };
             }
+            catch(TimeoutException error) {}
+            
             
 			wait = new WebDriverWait(driver, 5);
             try { wait.until(presenceOfElementLocated(By.className("btn-fixed-width-lg"))); }
