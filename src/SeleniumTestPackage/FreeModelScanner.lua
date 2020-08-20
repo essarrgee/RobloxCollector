@@ -35,6 +35,7 @@ local badScriptLineList = {
 	"kick", "ban", "crash", "shutdown",
 	"do not",
 	"IsStudio",
+	"obesity", "communism", "positivity", "IEndorseThese", "crex",
 	--Bad Module IDs
 	"1398224164", 
 	"1303852485", --Not too sure
