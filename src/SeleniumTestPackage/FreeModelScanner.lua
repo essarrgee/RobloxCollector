@@ -32,7 +32,7 @@ local badScriptLineList = {
 	"J0HN", "haxor",  --J0HNSCR1PT
 	"SEX", "HAAXX",
 	"CXdrU>SGS?OBQOS", --"Crash" script
-	"kick", "crash", "shutdown",
+	"kick", "ban", "crash", "shutdown",
 	"do not",
 	"IsStudio",
 }
