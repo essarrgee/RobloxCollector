@@ -13,12 +13,17 @@ local badNameSet = { --Dictionary to store bad words
 }
 local badClassSet = { --Dictionary to store questionable object types
 	["RotateP"] = true,
+	["RotateV"] = true, 
+	["VelocityMotor"] = true,
+	["Feature"] = true,
+	["Geometry"] = true,
+	["Timer"] = true,
 	["Glue"] = true,
 	["Hint"] = true,
 }
 local badScriptLineList = {
-	"Spread", 
-	"require", "getfenv", "tonumber", "load", "reverse",
+	"Spread", "heat",
+	"require", "getfenv", "tonumber", "load", "loadstring", "reverse",
 	"Synapse", "SynapseXen", 
 	"TeleportService", "MarketplaceService", "InsertService",
 	"Anti-Lag",
@@ -28,12 +33,7 @@ local badScriptLineList = {
 	"SEX", "HAAXX",
 	"CXdrU>SGS?OBQOS", --"Crash" script
 	"kick", "crash", "shutdown",
-	--Below belongs to the "BaseConvertor" script
-	"y1syd", "K2SMe7", "UFwB8_X7WW", "K41eHt", 
-	"DZPKaIYZrP", "jX7pfS1", "Jm0BG7iF", "UFwB8_X7WW",
-	"s24_HdvbDOm", "l8e8NA", "xcKTAo__", "DqqY",
-	"DZPKaIYZrP", "d1LMl", "BqtWenAqN"
-	
+	"do not",
 }
 
 function SpawnModels(assetList, timer)
@@ -90,6 +90,7 @@ function CheckObjectSafe(freemodel, object, index, id, newFolder)
 	local scriptAdd = 0;
 	if (object) then
 		if (object:IsA("BaseScript") or object:IsA("ModuleScript")) then
+			local foundList = {};
 			--print("Script "..object.Name.." found under "..object.Parent.Name.." for model "..freemodel.Name);
 			if (object:IsA("BaseScript")) then
 				object.Disabled = true;
@@ -97,9 +98,11 @@ function CheckObjectSafe(freemodel, object, index, id, newFolder)
 			--
 			for i=1, #badScriptLineList do --Look through script to find bad keywords
 				if (string.match(string.lower(object.Source), string.lower(badScriptLineList[i]))) then
-					warn(badScriptLineList[i].." found in "..object.Name.." in "..index..": "..id);
-					break;
+					table.insert(foundList, badScriptLineList[i]);
 				end
+			end
+			if (#foundList > 0) then
+				warn("("..table.concat(foundList, ", ")..") found in "..object.Name.." in "..index..": "..id);
 			end
 			pcall(function() object:Clone().Parent = newFolder end);
 			scriptAdd = 1;
@@ -113,25 +116,8 @@ end
 
 --Insert links here, surround each with quotations and separate by comma
 local assetList = { 
-	--Spawner
-	"https://www.roblox.com/library/208356627/Spawner",
-	"https://www.roblox.com/library/582148931/Spawners",
-	"https://www.roblox.com/library/1339262914/Epic-Spawner",
-	"https://www.roblox.com/library/3930446225/Spawner",
-	"https://www.roblox.com/library/1294191967/Spawner-NOGROUP",
-	"https://www.roblox.com/library/784106572/Weapon-Spawner",
-	"https://www.roblox.com/library/2833017581/Shotgun-Spawner",
-	"https://www.roblox.com/library/1190238599/Rifle-spawner",
-	"https://www.roblox.com/library/1088315965/Uzi-Spawner",
-	"https://www.roblox.com/library/137919919/Zombie-Spawner",
-	"https://www.roblox.com/library/467597362/Rainbow-Spawner",
-	"https://www.roblox.com/library/73057973/jeep-spawner"
-	
-	
-	
-	
 
-
+--0!replace
 
 }
 
