@@ -7,6 +7,16 @@ local badNameSet = { --Dictionary to store bad words
 	["INfecTION"] = true,
 	["WOMP WOMP INFECTED"] = true,
 	["mean774"] = true,
+	["J0HN"] = true,local InsertService = game:GetService("InsertService");
+local badNameSet = { --Dictionary to store bad words
+	["Spread"] = true,
+	["Anti-Lag"] = true,
+	["Vaccine"] = true,
+	["4D Being"] = true,
+	["INfecTION"] = true,
+	["Infected"] = true,
+	["WOMP WOMP INFECTED"] = true,
+	["mean774"] = true,
 	["J0HN"] = true,
 	["J0HNSCR1PT"] = true,
 	["Guest_Talking_Script"] = true,
@@ -23,16 +33,18 @@ local badClassSet = { --Dictionary to store questionable object types
 }
 local badScriptLineList = {
 	"Spread", "heat",
-	"require", "getfenv", "tonumber", "load", "loadstring", "reverse",
+	"require", "getfenv", "tonumber", "loadstring", "reverse",
+	"load", 
 	"Synapse", "SynapseXen", 
 	"TeleportService", "MarketplaceService", "InsertService",
 	"Anti-Lag",
-	"virus",
+	"virus", "infect", 
 	"1000000", --Used in spread fire scripts
 	"J0HN", "haxor",  --J0HNSCR1PT
 	"SEX", "HAAXX",
 	"CXdrU>SGS?OBQOS", --"Crash" script
 	"kick", "ban", "crash", "shutdown",
+	"fuck", "shit", "bitch", 
 	"do not",
 	"IsStudio",
 	"obesity", "communism", "positivity", "IEndorseThese", "crex",
@@ -40,6 +52,10 @@ local badScriptLineList = {
 	"1398224164", 
 	"1303852485", --Not too sure
 	"2342106098",
+	"2323876650", --Found in https://www.roblox.com/library/2604259058
+	"4965769761",
+	"5114417899",
+	"01546813029",
 }
 
 function SpawnModels(assetList, timer)
