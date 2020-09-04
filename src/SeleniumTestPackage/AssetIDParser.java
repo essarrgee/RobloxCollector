@@ -31,7 +31,7 @@ public class AssetIDParser {
 	public static String ConvertToLink(String id) {
 		String link = "";
 		int idLength = GetLength(id);
-		if (idLength > 5) { // Typical asset id length is 5
+		if (idLength >= 5) { // Lowest asset id length is 5 (ignores numbers with commas)
 			link = "https://www.roblox.com/library/" + id;
 		}
 		return link;

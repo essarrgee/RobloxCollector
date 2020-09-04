@@ -5,21 +5,14 @@ local badNameSet = { --Dictionary to store bad words
 	["Vaccine"] = true,
 	["4D Being"] = true,
 	["INfecTION"] = true,
-	["WOMP WOMP INFECTED"] = true,
-	["mean774"] = true,
-	["J0HN"] = true,local InsertService = game:GetService("InsertService");
-local badNameSet = { --Dictionary to store bad words
-	["Spread"] = true,
-	["Anti-Lag"] = true,
-	["Vaccine"] = true,
-	["4D Being"] = true,
-	["INfecTION"] = true,
 	["Infected"] = true,
 	["WOMP WOMP INFECTED"] = true,
 	["mean774"] = true,
 	["J0HN"] = true,
 	["J0HNSCR1PT"] = true,
 	["Guest_Talking_Script"] = true,
+	["OH SNAP YOU GOT INFECTED XD XD XD"] = true,
+	["Script......Or is it..."] = true,
 }
 local badClassSet = { --Dictionary to store questionable object types
 	["RotateP"] = true,
@@ -33,12 +26,18 @@ local badClassSet = { --Dictionary to store questionable object types
 }
 local badScriptLineList = {
 	"Spread", "heat",
-	"require", "getfenv", "tonumber", "loadstring", "reverse",
+	"require", "getfenv", "tonumber", "loadstring", "gsub", 
+	"httpservice", 
+	"reverse",
 	"load", 
+	"worm",
+	"RotateP", "RotateV", "suka", "hack", "lolz",
+	"insertNoobHere", "PhilosiphalLocations", --ProperGr�mmerNeededInPhilosiphalLocations
 	"Synapse", "SynapseXen", 
 	"TeleportService", "MarketplaceService", "InsertService",
-	"Anti-Lag",
-	"virus", "infect", 
+	"Anti-Lag", "antiexploit", "antibackdoor", 
+	"virus", "infect",
+	"IronBrew", --Obfuscation
 	"1000000", --Used in spread fire scripts
 	"J0HN", "haxor",  --J0HNSCR1PT
 	"SEX", "HAAXX",
@@ -46,7 +45,7 @@ local badScriptLineList = {
 	"kick", "ban", "crash", "shutdown",
 	"fuck", "shit", "bitch", 
 	"do not",
-	"IsStudio",
+	"IsStudio", "IsClient", "IsServer", "IsEdit", "IsRunMode",
 	"obesity", "communism", "positivity", "IEndorseThese", "crex",
 	--Bad Module IDs
 	"1398224164", 
@@ -56,6 +55,15 @@ local badScriptLineList = {
 	"4965769761",
 	"5114417899",
 	"01546813029",
+	"3667797501",
+	"3664252382",
+	"3095323008", --IronBrew
+	"3068230330",
+	"5084762641",
+	"4696605318",
+	"3114582642",
+	"4593408411", "2813844247", "3472854229", --CobaltPlus
+	
 }
 
 function SpawnModels(assetList, timer)
