@@ -1,4 +1,8 @@
 local InsertService = game:GetService("InsertService");
+local visitedItemSet = {}; --Stores item ids that have been visited already to 
+						   --avoid repeats in a single session
+local currentIndex = 0;
+
 local badNameSet = { --Dictionary to store bad words
 	["Spread"] = true,
 	["Anti-Lag"] = true,
@@ -74,19 +78,23 @@ function SpawnModels(assetList, timer)
 	newFolderServerStorage.Parent = game.ServerStorage;
 	for i=1, #assetList do
 		local currentId = tonumber(string.match(assetList[i], '%d+'));
-		if (currentId) then
+		if (currentId and not visitedItemSet[currentId]) then
+		
+			visitedItemSet[currentId] = true; --Store into visited set
+			currentIndex = currentIndex + 1;
+			
 			local newModel = Instance.new("Model", newFolder);
 			local insert = nil;
 			local status, error = 
 				pcall(function() insert = InsertService:LoadAsset(currentId) end);
-			print("spawning "..i..": "..currentId.."... ("..assetList[i]..")");
+			print("spawning "..currentIndex..": "..currentId.."... ("..assetList[i]..")");
 			if (not status) then
-				print("Could not spawn model ("..i..": "..currentId.."): "..error);
+				print("Could not spawn model ("..currentIndex..": "..currentId.."): "..error);
 			end
-			newModel.Name = i..": "..currentId;
+			newModel.Name = currentIndex..": "..currentId;
 			if (insert) then
 				insert.Parent = newModel;
-				CheckForScripts(newModel, i, currentId, newFolderServerStorage);
+				CheckForScripts(newModel, currentIndex, currentId, newFolderServerStorage);
 			end
 			wait();
 		end
