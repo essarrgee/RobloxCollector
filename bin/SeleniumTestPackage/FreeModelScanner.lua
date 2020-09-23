@@ -1,15 +1,22 @@
 local InsertService = game:GetService("InsertService");
+local visitedItemSet = {}; --Stores item ids that have been visited already to 
+						   --avoid repeats in a single session
+local currentIndex = 0;
+
 local badNameSet = { --Dictionary to store bad words
 	["Spread"] = true,
 	["Anti-Lag"] = true,
 	["Vaccine"] = true,
 	["4D Being"] = true,
 	["INfecTION"] = true,
+	["Infected"] = true,
 	["WOMP WOMP INFECTED"] = true,
 	["mean774"] = true,
 	["J0HN"] = true,
 	["J0HNSCR1PT"] = true,
 	["Guest_Talking_Script"] = true,
+	["OH SNAP YOU GOT INFECTED XD XD XD"] = true,
+	["Script......Or is it..."] = true,
 }
 local badClassSet = { --Dictionary to store questionable object types
 	["RotateP"] = true,
@@ -23,22 +30,47 @@ local badClassSet = { --Dictionary to store questionable object types
 }
 local badScriptLineList = {
 	"Spread", "heat",
-	"require", "getfenv", "tonumber", "load", "loadstring", "reverse",
+	"require", "getfenv", "tonumber", "loadstring", "gsub", 
+	"httpservice", 
+	"reverse",
+	"load", 
+	"worm",
+	"RotateP", "RotateV", "suka", "hack", "lolz",
+	"zacksisk", "cubiclemon rulz", 
+	"insertNoobHere", "PhilosiphalLocations", --ProperGr�mmerNeededInPhilosiphalLocations
 	"Synapse", "SynapseXen", 
 	"TeleportService", "MarketplaceService", "InsertService",
-	"Anti-Lag",
-	"virus",
+	"PromptPurchase", 
+	"Anti-Lag", "antiexploit", "antibackdoor", 
+	"virus", "infect", "lag", 
+	"Knox", "xylem", --"Anti-Lag"
+	"IronBrew", --Obfuscation
 	"1000000", --Used in spread fire scripts
 	"J0HN", "haxor",  --J0HNSCR1PT
 	"SEX", "HAAXX",
 	"CXdrU>SGS?OBQOS", --"Crash" script
 	"kick", "ban", "crash", "shutdown",
+	"fuck", "shit", "bitch", 
 	"do not",
-	"IsStudio",
+	"IsStudio", "IsClient", "IsServer", "IsEdit", "IsRunMode",
+	"obesity", "communism", "positivity", "IEndorseThese", "crex",
 	--Bad Module IDs
 	"1398224164", 
 	"1303852485", --Not too sure
 	"2342106098",
+	"2323876650", --Found in https://www.roblox.com/library/2604259058
+	"4965769761",
+	"5114417899",
+	"01546813029",
+	"3667797501",
+	"3664252382",
+	"3095323008", --IronBrew
+	"3068230330",
+	"5084762641",
+	"4696605318",
+	"3114582642",
+	"4593408411", "2813844247", "3472854229", --CobaltPlus
+	
 }
 
 function SpawnModels(assetList, timer)
@@ -49,19 +81,23 @@ function SpawnModels(assetList, timer)
 	newFolderServerStorage.Parent = game.ServerStorage;
 	for i=1, #assetList do
 		local currentId = tonumber(string.match(assetList[i], '%d+'));
-		if (currentId) then
+		if (currentId and not visitedItemSet[currentId]) then
+		
+			visitedItemSet[currentId] = true; --Store into visited set
+			currentIndex = currentIndex + 1;
+			
 			local newModel = Instance.new("Model", newFolder);
 			local insert = nil;
 			local status, error = 
 				pcall(function() insert = InsertService:LoadAsset(currentId) end);
-			print("spawning "..i..": "..currentId.."... ("..assetList[i]..")");
+			print("spawning "..currentIndex..": "..currentId.."... ("..assetList[i]..")");
 			if (not status) then
-				print("Could not spawn model ("..i..": "..currentId.."): "..error);
+				print("Could not spawn model ("..currentIndex..": "..currentId.."): "..error);
 			end
-			newModel.Name = i..": "..currentId;
+			newModel.Name = currentIndex..": "..currentId;
 			if (insert) then
 				insert.Parent = newModel;
-				CheckForScripts(newModel, i, currentId, newFolderServerStorage);
+				CheckForScripts(newModel, currentIndex, currentId, newFolderServerStorage);
 			end
 			wait();
 		end

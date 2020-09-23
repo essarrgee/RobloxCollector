@@ -17,6 +17,7 @@ local badNameSet = { --Dictionary to store bad words
 	["Guest_Talking_Script"] = true,
 	["OH SNAP YOU GOT INFECTED XD XD XD"] = true,
 	["Script......Or is it..."] = true,
+	["StudSurface"] = true, 
 }
 local badClassSet = { --Dictionary to store questionable object types
 	["RotateP"] = true,
@@ -36,11 +37,14 @@ local badScriptLineList = {
 	"load", 
 	"worm",
 	"RotateP", "RotateV", "suka", "hack", "lolz",
+	"zacksisk", "cubiclemon rulz", 
 	"insertNoobHere", "PhilosiphalLocations", --ProperGr�mmerNeededInPhilosiphalLocations
 	"Synapse", "SynapseXen", 
 	"TeleportService", "MarketplaceService", "InsertService",
+	"PromptPurchase", 
 	"Anti-Lag", "antiexploit", "antibackdoor", 
-	"virus", "infect",
+	"virus", "infect", "lag", "infinite", 
+	"Knox", "xylem", "votation", "longicate", "ramno", "zonsa", "gibite", --"Anti-Lag"
 	"IronBrew", --Obfuscation
 	"1000000", --Used in spread fire scripts
 	"J0HN", "haxor",  --J0HNSCR1PT
