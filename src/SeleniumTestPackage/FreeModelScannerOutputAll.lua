@@ -3,6 +3,9 @@ local visitedItemSet = {}; --Stores item ids that have been visited already to
 						   --avoid repeats in a single session
 local currentIndex = 0;
 
+--Dictionary that stores each item ID and marks them as "suspicious" if suspicious
+local flaggedItemMap = {};
+
 local badNameSet = { --Dictionary to store bad words
 	["Spread"] = true,
 	["Anti-Lag"] = true,
@@ -86,6 +89,7 @@ function SpawnModels(assetList, timer)
 		
 			visitedItemSet[currentId] = true; --Store into visited set
 			currentIndex = currentIndex + 1;
+			flaggedItemMap[currentId] = {currentIndex,false};
 			
 			local newModel = Instance.new("Model", newFolder);
 			local insert = nil;
@@ -106,28 +110,37 @@ function SpawnModels(assetList, timer)
 			wait(timer);
 		end
 	end
+	PrintFlags();
 	print("done.");
 end
 
 function CheckForScripts(freemodel, index, id, folder)
 	if (freemodel and folder) then
+		local flagged = false;
 		local scriptCount = 0;
 		local newFolder = Instance.new("Folder", folder);
 		newFolder.Name = freemodel.Name;
 		for i, v in pairs(freemodel:GetDescendants()) do
-			local unsafe, scriptAdd = CheckObjectSafe(freemodel, v, index, id, newFolder);
+			local _flagged, unsafe, scriptAdd = CheckObjectSafe(freemodel, v, index, id, newFolder);
 			scriptCount = scriptCount + scriptAdd;
 			if (unsafe) then
 				warn("Object "..v.Name.." ("..v.ClassName..")".." found under "
 				..v.Parent.Name.." for model "..i..": "..freemodel.Name);
 				--wait();
 			end
+			if (_flagged or unsafe) then
+				flagged = true;
+			end
+		end
+		if (flagged) then
+			flaggedItemMap[id][2] = true;
 		end
 		print("Found "..scriptCount.." script(s) in "..index..": "..id);
 	end
 end
 
 function CheckObjectSafe(freemodel, object, index, id, newFolder)
+	local flagged = false;
 	local unsafe = false;
 	local scriptAdd = 0;
 	if (object) then
@@ -144,6 +157,7 @@ function CheckObjectSafe(freemodel, object, index, id, newFolder)
 				end
 			end
 			if (#foundList > 0) then
+				flagged = true;
 				warn("("..table.concat(foundList, ", ")..") found in "..object.Name.." in "..index..": "..id);
 			end
 			pcall(function() object:Clone().Parent = newFolder end);
@@ -153,7 +167,24 @@ function CheckObjectSafe(freemodel, object, index, id, newFolder)
 			unsafe = true;
 		end
 	end
-	return unsafe, scriptAdd;
+	return flagged, unsafe, scriptAdd;
+end
+
+function PrintFlags()
+	for i,v in pairs(game.Players:GetChildren()) do
+		if (v.Name == "Output") then
+			v:Destroy();
+		end
+	end
+	local outputScript = Instance.new("Script", game.Players);
+	outputScript.Name = "Output";
+	for i,v in pairs(flaggedItemMap) do
+		print(v[1]..": "..i ..":", v[2]);
+		if (v[2]) then
+			outputScript.Source = outputScript.Source..(i ..":").."FLAGGED"..",";
+		end
+	end
+	print("Output script created! Find in game.Players");
 end
 
 --Insert links here, surround each with quotations and separate by comma

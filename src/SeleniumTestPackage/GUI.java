@@ -25,6 +25,7 @@ public class GUI {
 	
 	public JLabel rowLabel;
 	public JTextField rowEntry;
+	public JComboBox rowEntryMode;
 	public JButton rowEntryEnter;
 	public JButton rowEntryEnterNoGet;
 	public JButton rowEntryClear;
@@ -44,6 +45,7 @@ public class GUI {
 	public JTextArea scriptOutput;
 	public JScrollPane scriptOutputScroll;
 	
+	public String[] scriptList = {};
 	
 	public GUI() {
 		mainPanel = new JPanel();
@@ -88,22 +90,30 @@ public class GUI {
 		
 		rowEntry = new JTextField(45);
 		rowEntry.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		/*
 		rowEntry.addActionListener(action -> {
-			ParseEnter(false);
+			ParseEnter(false, "");
 		});
+		*/
 		rowPanel.add(rowEntry);
+		
+		String[] modeList = {"FreeModelScannerOutputAll.lua",
+				"FreeModelScanner.lua",
+				"FreeModelScannerTableOutput.lua"};
+		rowEntryMode = new JComboBox(modeList);
+		rowPanel.add(rowEntryMode);
 		
 		rowEntryEnter = new JButton("Enter");
 		rowEntryEnter.setFont(new Font("Tahoma", Font.BOLD, 16));
 		rowEntryEnter.addActionListener(action -> {
-			ParseEnter(false);
+			ParseEnter(false, modeList[rowEntryMode.getSelectedIndex()]);
 		});
 		rowPanel.add(rowEntryEnter);
 		
 		rowEntryEnterNoGet = new JButton("Enter w/o Get");
 		rowEntryEnterNoGet.setFont(new Font("Tahoma", Font.BOLD, 16));
 		rowEntryEnterNoGet.addActionListener(action -> {
-			ParseEnter(true);
+			ParseEnter(true, modeList[rowEntryMode.getSelectedIndex()]);
 		});
 		rowPanel.add(rowEntryEnterNoGet);
 		
@@ -174,7 +184,7 @@ public class GUI {
 		}
 	}
 	
-	public void ParseEnter(boolean skipGet) {
+	public void ParseEnter(boolean skipGet, String mode) {
 		if (userdataEntry != null && userdataEntry.getText() != ""
 		&& driverEntry != null && driverEntry.getText() != ""
 		&& profileEntry != null && profileEntry.getText() != ""
@@ -204,22 +214,22 @@ public class GUI {
 					collectorOutput.setText(outputListDisplay);
 				}
 				
-				scriptOutput.setText(generateScript(URLList));
+				scriptOutput.setText(generateScript(URLList, mode));
 			}
 			
 			mainFrame.setTitle("Collector");
 		}
 	}
 	
-	public String generateScript(String[] URLList) {
+	public String generateScript(String[] URLList, String mode) {
 		File luaScript = new File(
-			"FreeModelScanner.lua" // src/SeleniumTestPackage/
+			mode // src/SeleniumTestPackage/
 		);
 		Scanner scan = null;
 		try {
 			scan = new Scanner(luaScript);
 		} catch (FileNotFoundException e) {
-			System.out.println("no file found");
+			System.out.println(mode + " not found");
 		}
 		String newScript = "";
 		String listToInsert = "";
