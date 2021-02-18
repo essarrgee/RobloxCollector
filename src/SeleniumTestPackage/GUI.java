@@ -197,7 +197,7 @@ public class GUI {
 			
 			if (URLList.length > 0) {
 				for (int i=0; i<URLList.length; i++) {
-					URLListDisplay += URLList[i] + ", \n";
+					URLListDisplay += URLList[i] + " \n";
 				}
 				parsedIDEntry.setText(URLListDisplay);
 				

@@ -89,7 +89,7 @@ function SpawnModels(assetList, timer)
 		
 			visitedItemSet[currentId] = true; --Store into visited set
 			currentIndex = currentIndex + 1;
-			flaggedItemMap[currentIndex..": "..currentId] = "false";
+			flaggedItemMap[currentId] = {currentIndex,"false"};
 			
 			local newModel = Instance.new("Model", newFolder);
 			local insert = nil;
@@ -135,7 +135,7 @@ function CheckForScripts(freemodel, index, id, folder)
 			end
 		end
 		if (flagged) then
-			flaggedItemMap[index..": "..id] = "true";
+			flaggedItemMap[id][2] = "true";
 		end
 		--print("Found "..scriptCount.." script(s) in "..index..": "..id);
 	end
@@ -182,8 +182,8 @@ function PrintFlags()
 	local outputScript = Instance.new("Script", game.Players);
 	outputScript.Name = "Output";
 	for i,v in pairs(flaggedItemMap) do
-		print(i ..":", v);
-		outputScript.Source = outputScript.Source..("\n"..i ..": ")..v;
+		print(v[1]..": "..i ..":", v[2]);
+		outputScript.Source = outputScript.Source..(i ..":")..v[2]..",";
 	end
 	print("Output script created! Find in game.Players");
 end
