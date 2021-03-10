@@ -1,6 +1,9 @@
 local InsertService = game:GetService("InsertService");
 local visitedItemSet = {}; --Stores item ids that have been visited already to 
 						   --avoid repeats in a single session
+local itemQueue = {}; --Stores every item until length reaches threshold,
+					  --which it then starts deleting the oldest models in order
+local itemQueueThreshold = 20;
 local currentIndex = 0;
 
 local badNameSet = { --Dictionary to store bad words
@@ -30,31 +33,36 @@ local badClassSet = { --Dictionary to store questionable object types
 	["Hint"] = true,
 }
 local badScriptLineList = {
-	"Spread", "heat",
-	"require", "getfenv", "tonumber", "loadstring", "gsub", 
+	--POTENTIALLY suspicious keywords: 
+	"require", --Could be used to call an external module, but may not always be bad
+	"TeleportService", --May teleport user to another place
+	"MarketplaceService", "PromptPurchase", --May be used to spam user with purchase prompts
+	"InsertService", --May insert a bad model
+	"IsStudio", "IsClient", "IsServer", "IsEdit", "IsRunMode", --Used by plugins; suspicious in models
+	"tonumber", "gsub", "reverse", "load", --May be used to hide external module ID
+	"kick", "ban", "crash", "shutdown", --May be OK if used in admin script
+	"do not", --May be used in context: "DO NOT DELETE" which is suspicious
+	"Anti-Lag", "antiexploit", "antibackdoor", --May be used for "anti-..." scripts 
+	"Spread", "heat", --May be used in fire spread scripts, but could also be used in a non-harmful context
+	"worm", "virus", "infect", "lag", "infinite", --Potentially found in "virus" scripts
 	"httpservice", 
-	"reverse",
-	"load", 
-	"worm",
-	"RotateP", "RotateV", "suka", "hack", "lolz",
-	"zacksisk", "cubiclemon rulz", 
+	"discord",
+	
+	--VERY suspicious keywords
+	"getfenv", "loadstring", --Typically shouldn't use at all; used to hide an external module ID
+	"RotateP", "RotateV", --Deprecated objects
 	"insertNoobHere", "PhilosiphalLocations", --ProperGr�mmerNeededInPhilosiphalLocations
-	"Synapse", "SynapseXen", 
-	"TeleportService", "MarketplaceService", "InsertService",
-	"PromptPurchase", 
-	"Anti-Lag", "antiexploit", "antibackdoor", 
-	"virus", "infect", "lag", "infinite", 
+	"Synapse", "SynapseXen", --Synapse exploit
 	"Knox", "xylem", "votation", "longicate", "ramno", "zonsa", "gibite", --"Anti-Lag"
 	"IronBrew", --Obfuscation
 	"1000000", --Used in spread fire scripts
 	"J0HN", "haxor",  --J0HNSCR1PT
-	"SEX", "HAAXX",
 	"CXdrU>SGS?OBQOS", --"Crash" script
-	"kick", "ban", "crash", "shutdown",
-	"fuck", "shit", "bitch", 
-	"do not",
-	"IsStudio", "IsClient", "IsServer", "IsEdit", "IsRunMode",
-	"obesity", "communism", "positivity", "IEndorseThese", "crex",
+	"SEX", "fuck", "shit", "bitch", --Swear words
+	"obesity", "communism", "positivity", "IEndorseThese", "crex", --Was found in some exploit scripts
+	"suka", "zacksisk", "cubiclemon rulz",
+	"hack", "lolz", "HAAXX",
+	
 	--Bad Module IDs
 	"1398224164", 
 	"1303852485", --Not too sure
@@ -100,6 +108,8 @@ function SpawnModels(assetList, timer)
 				insert.Parent = newModel;
 				CheckForScripts(newModel, currentIndex, currentId, newFolderServerStorage);
 			end
+			AddToItemQueue(newModel);
+			ManageItemQueue();
 			wait();
 		end
 		if (timer) then
@@ -134,9 +144,6 @@ function CheckObjectSafe(freemodel, object, index, id, newFolder)
 		if (object:IsA("BaseScript") or object:IsA("ModuleScript")) then
 			local foundList = {};
 			--print("Script "..object.Name.." found under "..object.Parent.Name.." for model "..freemodel.Name);
-			if (object:IsA("BaseScript")) then
-				object.Disabled = true;
-			end
 			--
 			for i=1, #badScriptLineList do --Look through script to find bad keywords
 				if (string.match(string.lower(object.Source), string.lower(badScriptLineList[i]))) then
@@ -146,7 +153,13 @@ function CheckObjectSafe(freemodel, object, index, id, newFolder)
 			if (#foundList > 0) then
 				warn("("..table.concat(foundList, ", ")..") found in "..object.Name.." in "..index..": "..id);
 			end
-			pcall(function() object:Clone().Parent = newFolder end);
+			pcall(function() 
+				local clone = object:Clone();
+				if (clone:IsA("BaseScript")) then
+					clone.Disabled = true;
+				end
+				clone.Parent = newFolder;
+			end);
 			scriptAdd = 1;
 		end
 		if (badNameSet[object.Name] or badClassSet[object.ClassName]) then --Check by name/class
@@ -154,6 +167,22 @@ function CheckObjectSafe(freemodel, object, index, id, newFolder)
 		end
 	end
 	return unsafe, scriptAdd;
+end
+
+function AddToItemQueue(item)
+	if (item) then
+		table.insert(itemQueue, item);
+	end
+end
+
+function ManageItemQueue()
+	local nextItem = nil;
+	if (#itemQueue > itemQueueThreshold) then
+		nextItem = table.remove(itemQueue, 1);
+		if (nextItem) then
+			nextItem:Destroy();
+		end
+	end
 end
 
 --Insert links here, surround each with quotations and separate by comma
