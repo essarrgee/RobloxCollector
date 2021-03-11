@@ -6,8 +6,12 @@ local itemQueue = {}; --Stores every item until length reaches threshold,
 local itemQueueThreshold = 20;
 local currentIndex = 0;
 
+local provideMarketplaceInfo = true;
+local provideInfoOutputScript = true;
+
 --Dictionary that stores each item ID and marks them as "suspicious" if suspicious
-local flaggedItemMap = {};
+local itemInfoMap = {};
+--index, flagged, created date, updated date, creator id, creator name
 
 local badNameSet = { --Dictionary to store bad words
 	["Spread"] = true,
@@ -61,7 +65,7 @@ local badScriptLineList = {
 	"1000000", --Used in spread fire scripts
 	"J0HN", "haxor",  --J0HNSCR1PT
 	"CXdrU>SGS?OBQOS", --"Crash" script
-	"SEX", "fuck", "shit", "bitch", --Swear words
+	"SEX", "fuck", "shit", "bitch", "fauck", --Swear words
 	"obesity", "communism", "positivity", "IEndorseThese", "crex", --Was found in some exploit scripts
 	"suka", "zacksisk", "cubiclemon rulz",
 	"hack", "lolz", "HAAXX",
@@ -96,7 +100,7 @@ function SpawnModels(assetList, timer)
 		
 			visitedItemSet[currentId] = true; --Store into visited set
 			currentIndex = currentIndex + 1;
-			flaggedItemMap[currentId] = {currentIndex,false};
+			itemInfoMap[currentId] = {currentIndex,false,"","",""};
 			
 			local newModel = Instance.new("Model", newFolder);
 			local insert = nil;
@@ -111,6 +115,7 @@ function SpawnModels(assetList, timer)
 				insert.Parent = newModel;
 				CheckForScripts(newModel, currentIndex, currentId, newFolderServerStorage);
 			end
+			CheckMarketplaceInfo(currentIndex, currentId);
 			AddToItemQueue(newModel);
 			ManageItemQueue();
 			wait();
@@ -119,8 +124,25 @@ function SpawnModels(assetList, timer)
 			wait(timer);
 		end
 	end
-	PrintFlags();
+	PrintInfo();
 	print("done.");
+end
+
+function CheckMarketplaceInfo(index, id)
+	if (provideMarketplaceInfo and index and id) then
+		local info = nil;
+		local status, error = 
+			pcall(function() 
+				info = game:GetService("MarketplaceService"):GetProductInfo(id);
+			end);
+		--index, flagged, created date, updated date, creator id, creator name
+		if (info) then
+			itemInfoMap[id][3] = info.Created;
+			itemInfoMap[id][4] = info.Updated;
+			itemInfoMap[id][5] = info.Creator.Id;
+			itemInfoMap[id][6] = info.Creator.Name;
+		end
+	end
 end
 
 function CheckForScripts(freemodel, index, id, folder)
@@ -142,7 +164,7 @@ function CheckForScripts(freemodel, index, id, folder)
 			end
 		end
 		if (flagged) then
-			flaggedItemMap[id][2] = true;
+			itemInfoMap[id][2] = true;
 		end
 		print("Found "..scriptCount.." script(s) in "..index..": "..id);
 	end
@@ -182,21 +204,37 @@ function CheckObjectSafe(freemodel, object, index, id, newFolder)
 	return flagged, unsafe, scriptAdd;
 end
 
-function PrintFlags()
-	for i,v in pairs(game.Players:GetChildren()) do
-		if (v.Name == "Output") then
-			v:Destroy();
+function PrintInfo()
+	if (provideInfoOutputScript) then
+		for i,v in pairs(game.Players:GetChildren()) do
+			if (v.Name == "Output") then
+				v:Destroy();
+			end
 		end
-	end
-	local outputScript = Instance.new("Script", game.Players);
-	outputScript.Name = "Output";
-	for i,v in pairs(flaggedItemMap) do
-		print(v[1]..": "..i ..":", v[2]);
-		if (v[2]) then
-			outputScript.Source = outputScript.Source..(i ..":").."FLAGGED"..",";
+		local outputScript = Instance.new("Script", game.Players);
+		outputScript.Name = "Output";
+		for i,v in pairs(itemInfoMap) do
+			local newEntry = ""
+			print(v[1]..": "..i ..":", v[2]);
+			--Use "::" to separate each sub-index to not interfere with the time
+			--Use "," to separate each entry
+			newEntry = newEntry..(i.."::");
+			if (v[2]) then
+				newEntry = newEntry.."FLAGGED::";
+			else
+				newEntry = newEntry.."NOT_FLAGGED::";
+			end
+			for i=3, 6 do
+				if (v[i] and v[i] ~= "") then --Created Date
+					newEntry = newEntry..(tostring(v[i])).."::";
+				else
+					newEntry = newEntry.."nil::";
+				end
+			end
+			outputScript.Source = newEntry..","
 		end
+		print("Output script created! Find in game.Players");
 	end
-	print("Output script created! Find in game.Players");
 end
 
 function AddToItemQueue(item)
