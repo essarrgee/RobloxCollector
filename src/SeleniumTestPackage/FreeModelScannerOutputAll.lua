@@ -11,7 +11,12 @@ local provideInfoOutputScript = true;
 
 --Dictionary that stores each item ID and marks them as "suspicious" if suspicious
 local itemInfoMap = {};
---index, flagged, created date, updated date, creator id, creator name
+--index, flagged, {created date, updated date, creator id, creator name}, availability
+
+local endorsedUserIdSet = { --Users in this list are safe from flagging
+	["1"] = true,
+	
+}
 
 local badNameSet = { --Dictionary to store bad words
 	["Spread"] = true,
@@ -46,7 +51,7 @@ local badScriptLineList = {
 	"MarketplaceService", "PromptPurchase", --May be used to spam user with purchase prompts
 	"InsertService", --May insert a bad model
 	"IsStudio", "IsClient", "IsServer", "IsEdit", "IsRunMode", --Used by plugins; suspicious in models
-	"tonumber", "gsub", "reverse", "load", --May be used to hide external module ID
+	"tonumber", "gsub", "reverse", "load", "byte", --May be used to hide external module ID
 	"kick", "ban", "crash", "shutdown", --May be OK if used in admin script
 	"do not", --May be used in context: "DO NOT DELETE" which is suspicious
 	"Anti-Lag", "antiexploit", "antibackdoor", --May be used for "anti-..." scripts 
@@ -68,7 +73,7 @@ local badScriptLineList = {
 	"SEX", "fuck", "shit", "bitch", "fauck", --Swear words
 	"obesity", "communism", "positivity", "IEndorseThese", "crex", --Was found in some exploit scripts
 	"suka", "zacksisk", "cubiclemon rulz",
-	"hack", "lolz", "HAAXX",
+	"hack", "lolz", "HAAXX", "obfuscation",
 	
 	--Bad Module IDs
 	"1398224164", 
@@ -100,7 +105,7 @@ function SpawnModels(assetList, timer)
 		
 			visitedItemSet[currentId] = true; --Store into visited set
 			currentIndex = currentIndex + 1;
-			itemInfoMap[currentId] = {currentIndex,false,"","",""};
+			itemInfoMap[currentId] = {currentIndex,false,{"","","",""},true};
 			
 			local newModel = Instance.new("Model", newFolder);
 			local insert = nil;
@@ -108,14 +113,15 @@ function SpawnModels(assetList, timer)
 				pcall(function() insert = InsertService:LoadAsset(currentId) end);
 			print("spawning "..currentIndex..": "..currentId.."... ("..assetList[i]..")");
 			if (not status) then
-				print("Could not spawn model ("..currentIndex..": "..currentId.."): "..error);
+				warn("Could not spawn model ("..currentIndex..": "..currentId.."): "..error);
+				itemInfoMap[currentId][4] = false;
 			end
 			newModel.Name = currentIndex..": "..currentId;
 			if (insert) then
 				insert.Parent = newModel;
 				CheckForScripts(newModel, currentIndex, currentId, newFolderServerStorage);
 			end
-			CheckMarketplaceInfo(currentIndex, currentId);
+			CheckMarketplaceInfo(currentIndex, currentId, insert);
 			AddToItemQueue(newModel);
 			ManageItemQueue();
 			wait();
@@ -128,7 +134,7 @@ function SpawnModels(assetList, timer)
 	print("done.");
 end
 
-function CheckMarketplaceInfo(index, id)
+function CheckMarketplaceInfo(index, id, insert)
 	if (provideMarketplaceInfo and index and id) then
 		local info = nil;
 		local status, error = 
@@ -137,10 +143,10 @@ function CheckMarketplaceInfo(index, id)
 			end);
 		--index, flagged, created date, updated date, creator id, creator name
 		if (info) then
-			itemInfoMap[id][3] = info.Created;
-			itemInfoMap[id][4] = info.Updated;
-			itemInfoMap[id][5] = info.Creator.Id;
-			itemInfoMap[id][6] = info.Creator.Name;
+			itemInfoMap[id][3][1] = info.Created;
+			itemInfoMap[id][3][2] = info.Updated;
+			itemInfoMap[id][3][3] = info.Creator.Id;
+			itemInfoMap[id][3][4] = info.Creator.Name;
 		end
 	end
 end
@@ -219,17 +225,28 @@ function PrintInfo()
 			--Use "::" to separate each sub-index to not interfere with the time
 			--Use "," to separate each entry
 			newEntry = newEntry..(i.."::");
-			if (v[2]) then
+			if (v[3] and v[3][3] and endorsedUserIdSet[tostring(v[3][3])]) then
+				warn(v[1]..": is endorsed");
+				newEntry = newEntry.."NOT_FLAGGED::";
+			elseif (v[2]) then
 				newEntry = newEntry.."FLAGGED::";
 			else
 				newEntry = newEntry.."NOT_FLAGGED::";
 			end
-			for i=3, 6 do
-				if (v[i] and v[i] ~= "") then --Created Date
-					newEntry = newEntry..(tostring(v[i])).."::";
-				else
-					newEntry = newEntry.."nil::";
+			if (v[3]) then
+				for i=1, 4 do
+					if (v[3][i] and v[3][i] ~= "") then
+						newEntry = newEntry..(tostring(v[3][i])).."::";
+					else
+						newEntry = newEntry.."nil::";
+					end
 				end
+			end
+			if (v[4]) then
+				newEntry = newEntry.."true::";
+			else
+				warn(v[1]..": is unavailable");
+				newEntry = newEntry.."false::";
 			end
 			outputScript.Source = newEntry..","
 		end
